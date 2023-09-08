@@ -75,6 +75,7 @@ mycursor = database.cursor()
 
 
 def orders(x):
+    
     if x == 1:
         name = input("Enter your name: ")
         customer_id = input("Enter your customer_id(mail-id) :")
