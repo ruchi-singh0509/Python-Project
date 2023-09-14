@@ -51,7 +51,7 @@
 # else:
 #     print("ERROR:ID NOT FOUND")
 
-
+import random
 import mysql.connector
 
 
@@ -64,23 +64,27 @@ database = mysql.connector.connect(
 
 mycursor = database.cursor()
 
-# Customer_details = "CREATE TABLE IF NOT EXISTS CustomerDetail (Name VARCHAR(255),customerID VARCHAR(255) );"
-# Order_Details = "CREATE TABLE IF NOT EXISTS OrderDetail (OrderID int AUTO_INCREMENT PRIMARY KEY, customerID VARCHAR(255));"
-# Item_Details = (
-#     "CREATE TABLE IF NOT EXISTS ItemDetail(OrderID int,Item VARCHAR(200),Amount int);"
-# )
-# mycursor.execute(Customer_details)
-# mycursor.execute(Order_Details)
-# mycursor.execute(Item_Details)
+Customer_details = "CREATE TABLE IF NOT EXISTS CustomerDetail (Name VARCHAR(255),customerID VARCHAR(255) PRIMARY KEY NOT NULL );"
+Order_Details = "CREATE TABLE IF NOT EXISTS OrderDetail (OrderID int AUTO_INCREMENT PRIMARY KEY NOT NULL, customer_ID VARCHAR(255) NOT NULL);"
+Item_Details = "CREATE TABLE IF NOT EXISTS ItemDetail(Order_ID int AUTO_INCREMENT PRIMARY KEY NOT NULL,Item VARCHAR(200),Amount int);"
+foreign_keys = "ALTER TABLE OrderDetail  ADD CONSTRAINT FK_customerID FOREIGN KEY (customer_ID) REFERENCES CustomerDetail (customerID);"
+foreign_keys2 = "ALTER TABLE ItemDetail ADD CONSTRAINT FK_OrderID FOREIGN KEY (Order_ID) REFERENCES OrderDetail (OrderID);"
+
+
+mycursor.execute(Customer_details)
+mycursor.execute(Order_Details)
+mycursor.execute(Item_Details)
+mycursor.execute(foreign_keys)
+mycursor.execute(foreign_keys2)
 
 
 def orders(x):
-    
     if x == 1:
         name = input("Enter your name: ")
         customer_id = input("Enter your customer_id(mail-id) :")
         item_purchased = input("Enter the Item name: ")
         amount = int(input("Enter the price of item: "))
+
         mycursor.execute(
             """
             INSERT IGNORE INTO CustomerDetail ( customerID , Name)
@@ -91,7 +95,7 @@ def orders(x):
 
         mycursor.execute(
             """
-            INSERT IGNORE INTO OrderDetail (customerID)
+            INSERT IGNORE INTO OrderDetail (customer_ID)
             VALUES (%s)
             """,
             (customer_id,),
