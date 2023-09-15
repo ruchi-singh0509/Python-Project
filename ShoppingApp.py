@@ -51,7 +51,7 @@
 # else:
 #     print("ERROR:ID NOT FOUND")
 
-import random
+
 import mysql.connector
 
 
@@ -63,28 +63,28 @@ database = mysql.connector.connect(
 )
 
 mycursor = database.cursor()
-
-Customer_details = "CREATE TABLE IF NOT EXISTS CustomerDetail (Name VARCHAR(255),customerID VARCHAR(255) PRIMARY KEY NOT NULL );"
+# CREATE TABLES
+""" Customer_details = "CREATE TABLE IF NOT EXISTS CustomerDetail (Name VARCHAR(255),customerID VARCHAR(255) PRIMARY KEY NOT NULL );"
 Order_Details = "CREATE TABLE IF NOT EXISTS OrderDetail (OrderID int AUTO_INCREMENT PRIMARY KEY NOT NULL, customer_ID VARCHAR(255) NOT NULL);"
 Item_Details = "CREATE TABLE IF NOT EXISTS ItemDetail(Order_ID int AUTO_INCREMENT PRIMARY KEY NOT NULL,Item VARCHAR(200),Amount int);"
-foreign_keys = "ALTER TABLE OrderDetail  ADD CONSTRAINT FK_customerID FOREIGN KEY (customer_ID) REFERENCES CustomerDetail (customerID);"
-foreign_keys2 = "ALTER TABLE ItemDetail ADD CONSTRAINT FK_OrderID FOREIGN KEY (Order_ID) REFERENCES OrderDetail (OrderID);"
-
-
+"""
+"""
 mycursor.execute(Customer_details)
 mycursor.execute(Order_Details)
-mycursor.execute(Item_Details)
-mycursor.execute(foreign_keys)
-mycursor.execute(foreign_keys2)
+mycursor.execute(Item_Details)"""
+# ADD FOREIGN KEY CONSTRAINTS
+"""mycursor.execute("ALTER TABLE OrderDetail  ADD CONSTRAINT FK_customerID FOREIGN KEY (customer_ID) REFERENCES CustomerDetail (customerID);")
+mycursor.execute("ALTER TABLE ItemDetail ADD CONSTRAINT FK_OrderID FOREIGN KEY (Order_ID) REFERENCES OrderDetail (OrderID);)
+"""
 
 
-def orders(x):
+def Take_orders(x):
     if x == 1:
         name = input("Enter your name: ")
         customer_id = input("Enter your customer_id(mail-id) :")
         item_purchased = input("Enter the Item name: ")
         amount = int(input("Enter the price of item: "))
-
+        # Insert data into CustomerDetail table
         mycursor.execute(
             """
             INSERT IGNORE INTO CustomerDetail ( customerID , Name)
@@ -92,7 +92,7 @@ def orders(x):
             """,
             (customer_id, name),
         )
-
+        # Insert data into OrderDetail table
         mycursor.execute(
             """
             INSERT IGNORE INTO OrderDetail (customer_ID)
@@ -100,7 +100,7 @@ def orders(x):
             """,
             (customer_id,),
         )
-
+        # Insert data into ItemDetail table
         mycursor.execute(
             """
             INSERT IGNORE INTO ItemDetail (Item,Amount)
@@ -113,10 +113,13 @@ def orders(x):
         print("Order processed successfully")
 
     elif x == 2:
-        # mycursor.execute(
-        #     "SELECT C.Name,O.OrderID,I.Item,I.OrderID,C.customerID,I.Amount FROM CustomerDetail C LEFT OUTER JOIN OrderDetail O ON C.customerID = O.customerID RIGHT OUTER JOIN ItemDetail I ON I.OrderID = O.OrderID"
-        # )
-        mycursor.execute("SELECT * FROM ItemDetail")
+        customer_id = input("Enter your customer_id(mail-id) :")
+
+        mycursor.execute(
+            "SELECT * FROM (SELECT O.OrderID, I.Item,I.Amount from OrderDetail O JOIN ItemDetail I ON I.Order_ID = O.OrderID) WHERE customerID =%s",
+            (customer_id,),
+        )
+
         rows = mycursor.fetchall()
         for y in rows:
             print(y)
@@ -132,7 +135,7 @@ while x != 0:
     print("2. Print Order")
     print("0.Exit")
     x = int(input("Enter an option: "))
-    orders(x)
-# if (database):
-#     database.close()
-#     print("\n The Mysql connection is closed.")
+    Take_orders(x)
+if database:
+    database.close()
+    print("\n The Mysql connection is closed.")
